@@ -32,10 +32,9 @@ from services.ultrasound_service import process_ultrasound, init_ultrasound_mode
 from services.mri_service import process_mri, init_mri_models
 
 # Initialize Google GenAI Client (multimodal)
-# pip install google-genai
-from google import genai
-from google.genai.types import Part
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+# pip install google-generativeai
+import google.generativeai as genai
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 # Global: store latest predictions for frontend polling
 latest_xray_results: dict = {}
@@ -167,29 +166,22 @@ def generate_medical_report(symptoms: List[str], image_bytes: bytes, modality: s
     # Prepare prompt
     template = PROMPT_TEMPLATES.get(modality.lower(), FALLBACK_TEMPLATE)
     prompt = template.format(symptoms=", ".join(symptoms))
-    # prompt = (
-    #     f"Based on the provided image and the following symptoms: {', '.join(symptoms)}, "
-    #     "generate a clear, concise, and professional medical report. "
-    #     "Include possible diagnoses, recommended next steps, and any relevant notes."
-    # )
-    # Wrap image bytes in Part for multimodal input
     
-
-    contents = []
-    # Only wrap image if we actually have bytes and a valid mime_type
+    # Create model instance
+    model = genai.GenerativeModel('gemini-1.5-flash')
+    
+    contents = [prompt]
+    
+    # Only add image if we actually have bytes and a valid mime_type
     if image_bytes is not None and mime_type and mime_type.startswith("image/"):
-        from google.genai.types import Part
-        image_part = Part.from_bytes(data=image_bytes, mime_type=mime_type)
-        contents.append(image_part)
+        import io
+        from PIL import Image
+        image = Image.open(io.BytesIO(image_bytes))
+        contents.append(image)
 
-    # Always add the prompt
-    contents.append(prompt)
-
-    # Generate content with image part and prompt
-    response = client.models.generate_content(
-        model="models/gemini-2.0-flash",
-        contents=contents
-    )
+    # Generate content with image and prompt
+    response = model.generate_content(contents)
+    
     if not response or not hasattr(response, 'text') or response.text is None:
         raise HTTPException(status_code=500, detail="Empty response from Gemini API.")
     return response.text
