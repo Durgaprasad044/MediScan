@@ -1,15 +1,28 @@
-import React, { useEffect, useState } from 'react';
+"use client";
+import React, { useEffect, useState, useContext } from 'react';
 import ReportCard from './ReportCard';
-import { useParams, useLocation } from 'react-router-dom'; // added useLocation
+import { AppContext } from './context/AppContext';
 
 const BASE_API_URL = 'http://127.0.0.1:8000';
 
 const ResultsPage = () => {
-  const { cleanType } = useParams(); // e.g., 'xray', 'ct', etc.
-  const location = useLocation();
+  const { selectedImageType: ctxSelectedImageType, processedData: ctxProcessedData } = useContext(AppContext);
 
-  // Try to get the passed state from navigation:
-  const { selectedImageType, processedData } = location.state || {};
+  // Try to get processed data from context or localStorage
+  let selectedImageType = ctxSelectedImageType;
+  let processedData = ctxProcessedData;
+  if (!processedData && typeof window !== 'undefined') {
+    const saved = localStorage.getItem('mediscan_processed');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed?.processedData) processedData = parsed.processedData;
+        if (parsed?.selectedImageType) selectedImageType = parsed.selectedImageType;
+      } catch (e) {
+        console.warn('Failed to parse persisted processed data');
+      }
+    }
+  }
 
   const [reportData, setReportData] = useState(null);
   const [error, setError] = useState(null);

@@ -1,5 +1,6 @@
+"use client";
 import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { Button } from "./components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './components/ui/card';
@@ -16,7 +17,7 @@ const UploadPage = ({ selectedImageType, setSelectedImageType, setProcessedData 
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -96,27 +97,22 @@ const UploadPage = ({ selectedImageType, setSelectedImageType, setProcessedData 
       reportData = predictionRes.data;
     }
 
-    setProcessedData({
+    const finalProcessed = {
       predictions: predictionRes.data.predictions || null,
       report: reportData.report,
       disease: reportData.disease,
       symptoms: reportData.symptoms || [],
       imagePreview: preview,
       imageType: selectedImageType
-    });
+    };
 
-    navigate('/results', {
-      state: {
-        selectedImageType,
-        processedData: {
-          predictions: predictionRes.data.predictions || null,
-          report: reportData.report,
-          disease: reportData.disease,
-          symptoms: reportData.symptoms || [],
-          imagePreview: preview,
-        },
-      },
-    });
+    setProcessedData(finalProcessed);
+
+    // Persist processed data to localStorage and navigate to results page
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('mediscan_processed', JSON.stringify({ selectedImageType, processedData: finalProcessed }));
+    }
+    router.push('/results');
   } catch (err) {
     console.error(err);
     setError('An error occurred during upload or analysis. Please try again.');

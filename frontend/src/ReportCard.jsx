@@ -1,8 +1,9 @@
+"use client";
 import React, { useRef, useState } from 'react';
 import { pdf } from '@react-pdf/renderer';
 import { saveAs } from 'file-saver';
 import ReportPDF from './components/ReportPDF';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 
 import {
   Card,
@@ -37,7 +38,7 @@ const ReportCard = ({ report }) => {
     timestamp = new Date().toISOString()
   } = report || {};
 
-  const navigate = useNavigate();
+  const router = useRouter();
   const cardRef = useRef(null);
   const [openDialog, setOpenDialog] = useState(false);
 
@@ -266,7 +267,7 @@ const ReportCard = ({ report }) => {
         {/* Chat with Report Button */}
         <Button
           variant="secondary"
-          onClick={() => navigate('/resultchat')}
+          onClick={() => router.push('/resultchat')}
           className="ml-auto"
         >
           <MessageSquare className="mr-2 h-4 w-4" /> Chat with Report
@@ -275,7 +276,7 @@ const ReportCard = ({ report }) => {
         {/* Search Doctor Button */}
         <Button
           variant="secondary"
-          onClick={() => navigate('/search-doctor')}
+          onClick={() => router.push('/search-doctor')}
         >
           <Stethoscope className="mr-2 h-4 w-4" /> Search Doctor
         </Button>

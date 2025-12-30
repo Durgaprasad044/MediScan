@@ -1,5 +1,6 @@
+"use client";
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { Button } from './components/ui/button';
 import { Card, CardContent } from './components/ui/card';
 import {
@@ -51,7 +52,7 @@ const LandingPage = () => {
 
               <div className="pt-4 flex flex-wrap gap-4">
 
-                <Link to="/upload">
+                <Link href="/upload">
                   <InteractiveHoverButton>Start Diagnosis</InteractiveHoverButton>
                 </Link>
 
@@ -198,7 +199,7 @@ const LandingPage = () => {
                 size="lg"
                 className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 shadow-lg rounded-full transition-transform transform hover:scale-105"
               >
-                <Link to="/upload">
+                <Link href="/upload">
                 
                   Start Your First Analysis <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
@@ -229,7 +230,7 @@ const LandingPage = () => {
               size="lg"
               className="bg-white text-black px-8 shadow-lg rounded-full transition-transform transform hover:scale-105 text-sm font-bold"
             >
-              <Link to="/contact">Contact Us</Link>
+              <Link href="/contact">Contact Us</Link>
             </Button>
           </div>
         </div>
